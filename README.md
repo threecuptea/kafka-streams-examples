@@ -4,6 +4,7 @@
       The instruction to run integration tests is in javadoc of that class
        
       To run WordCountDemo in streams-examples of Kafka-src 
+      
         - copy run-streams-examples.sh that I put together under script folder to the kafka-src directory
         - change to that directory 
         - gradle
