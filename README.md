@@ -3,13 +3,13 @@
    1. WordCountLambdaDemo (working example)
       The instruction to run integration tests is in javadoc of that class
        
-      To run WordCountDemo in streams-examples of Kafka-src, 
-        * copy run-streams-examples.sh that I put together under script folder to the kafka-src directory
-        * change to that directory 
-        * gradle
-        * ./gradlew streams:examples:tasks (if you want to find out what gradle task to use)
-        * ./gradlew clean -PscalaVersion=2.12 streams:examples:jar
-        * ./run-streams-examples.sh org.apache.kafka.streams.examples.wordcount.WordCountDemo
+      To run WordCountDemo in streams-examples of Kafka-src 
+        - copy run-streams-examples.sh that I put together under script folder to the kafka-src directory
+        - change to that directory 
+        - gradle
+        - ./gradlew streams:examples:tasks (if you want to find out what gradle task to use)
+        - ./gradlew clean -PscalaVersion=2.12 streams:examples:jar
+        - ./run-streams-examples.sh org.apache.kafka.streams.examples.wordcount.WordCountDemo
       
    2. PageViewRegionLambda (Working progress)   
       
