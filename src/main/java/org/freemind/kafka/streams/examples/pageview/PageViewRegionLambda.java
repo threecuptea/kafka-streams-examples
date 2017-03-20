@@ -24,7 +24,7 @@ import java.util.UUID;
 
 /**
  * Inspired by org.apache.kafka.streams.examples.pageview.PageViewUntypedDemo
- * Created by fandev on 2/27/17.
+ * Created by fandev on 3/11/17.
  */
 public class PageViewRegionLambda {
 
@@ -44,7 +44,7 @@ public class PageViewRegionLambda {
         Serde<JsonNode> jsonSerde = Serdes.serdeFrom(jsonSerializer, jsonDeserializer);
 
         KStream<String, JsonNode> views = builder.stream(Serdes.String(), jsonSerde, "streams-pageview-input");
-        KTable<String, JsonNode> users = builder.table(Serdes.String(), jsonSerde, "streams-pageview-input", "streams-pageview-store");
+        KTable<String, JsonNode> users = builder.table(Serdes.String(), jsonSerde, "streams-userprofile-input", "streams-userprofile-store");
         KTable<String, String> userRegions =  users.mapValues(value -> value.get("region").textValue());
 
         //return KTable<Windowed<String>, Long> after .count(TimeWindows.of(5 * 60 * 1000L).advanceBy(60 * 1000L), "PageViewsByRegionStore")

@@ -1,7 +1,6 @@
 package org.freemind.kafka.streams.examples.wordcount;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
@@ -45,9 +44,9 @@ import java.util.UUID;
  * bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic streams-file-input
  * and other topic or change-log with delete.topic.enable=true
  *
- * Verify with integration test
+ * Verify with Kafka server
  *
- * @author  sling(threecuptea) on 2/26/2017
+ * @author  sling(threecuptea) on 3/11/2017
  */
 public class WordCountLambdaDemo {
 
