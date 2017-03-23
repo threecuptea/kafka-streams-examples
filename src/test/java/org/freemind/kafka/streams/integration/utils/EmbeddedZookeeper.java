@@ -1,4 +1,4 @@
-package org.freemind.kafka.streams.utils;
+package org.freemind.kafka.streams.integration.utils;
 
 import org.apache.zookeeper.server.NIOServerCnxnFactory;
 import org.apache.zookeeper.server.ServerCnxnFactory;
@@ -38,18 +38,18 @@ public class EmbeddedZookeeper {
 
     private int resolvePort(int port) {
         if (port == -1) {
-            return Utils.getAvailablePort();
+            return TestUtils.getAvailablePort();
         }
         return port;
     }
 
     public void startup() throws IOException{
         if (this.port == -1) {
-            this.port = Utils.getAvailablePort();
+            this.port = TestUtils.getAvailablePort();
         }
         this.factory = NIOServerCnxnFactory.createFactory(new InetSocketAddress("localhost", port), 1024);
-        this.snapshotDir = Utils.constructTempDir("embeeded-zk/snapshot");
-        this.logDir = Utils.constructTempDir("embeeded-zk/log");
+        this.snapshotDir = TestUtils.constructTempDir("embeeded-zk/snapshot");
+        this.logDir = TestUtils.constructTempDir("embeeded-zk/log");
 
         try {
             factory.startup(new ZooKeeperServer(snapshotDir, logDir, tickTime));
@@ -62,12 +62,12 @@ public class EmbeddedZookeeper {
     public void shutdown() {
         factory.shutdown();
         try {
-            Utils.deleteFile(snapshotDir);
+            TestUtils.deleteFile(snapshotDir);
         } catch (FileNotFoundException e) {
             // ignore
         }
         try {
-            Utils.deleteFile(logDir);
+            TestUtils.deleteFile(logDir);
         } catch (FileNotFoundException e) {
             // ignore
         }

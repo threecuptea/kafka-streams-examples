@@ -1,4 +1,4 @@
-package org.freemind.kafka.streams.utils;
+package org.freemind.kafka.streams.integration.utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -7,13 +7,13 @@ import java.net.ServerSocket;
 import java.util.Random;
 
 /**
- * Created by fandev on 3/19/17.
+ * Created by fandev on 3/23/17.
  */
-public class Utils {
+public class TestUtils {
 
     private static final Random RANDOM = new Random();
 
-    private Utils() {
+    private TestUtils() {
     }
 
     public static File constructTempDir(String dirPrefix) {

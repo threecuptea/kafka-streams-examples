@@ -1,4 +1,4 @@
-package org.freemind.kafka.streams.utils;
+package org.freemind.kafka.streams.integration.utils;
 
 /**
  * Try to get embedded kafka server 0.10.2.0 work for integration test without using Kafka internal scala class

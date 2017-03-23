@@ -10,7 +10,7 @@ import org.apache.kafka.common.utils.Time
   *  However, both KafkaEmbedded and EmbeddedKafkaServer depend upon this.  Need some work to make sure scala class
   *  was compiled before java class
   */
-object TestUtils {
+object KafkaServerBridge {
 
   def createServer(config: KafkaConfig, time: Time = Time.SYSTEM): KafkaServer = {
     val server = new KafkaServer(config, time)
