@@ -50,23 +50,48 @@ import java.util.UUID;
  */
 public class WordCountLambdaDemo {
 
+    public static final String TOPIC_IN = "streams-file-input";
+    public static final String TOPIC_OUT = "streams-wordcount-output";
+
+    private String bootstrapServer;
+    private String storePath;
+
+    public WordCountLambdaDemo() {
+        this("localhost:9092", null);
+    }
+
+    public WordCountLambdaDemo(String bootstrapServer, String storePath) {
+        this.bootstrapServer = bootstrapServer;
+        this.storePath = storePath;
+    }
+
     public static void main(String[] args) throws Exception {
+
+        WordCountLambdaDemo wordCount = new WordCountLambdaDemo();
+        wordCount.execute();
+
+    }
+
+    public void execute() throws Exception {
         Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-wordcount");
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
         props.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
         // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString()); //To ensure each test run independently
+        if (storePath != null) {
+            props.put(StreamsConfig.STATE_DIR_CONFIG, storePath);
+        }
 
         KStreamBuilder builder = new KStreamBuilder();
-        KStream<String, String> source = builder.stream("streams-file-input");
+        KStream<String, String> source = builder.stream(TOPIC_IN);
         KTable<String, Long> counts = source.flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
                 .groupBy((key, value) -> value)
                 .count("Counts");
-        counts.to(Serdes.String(), Serdes.Long(), "streams-wordcount-output");
+        counts.to(Serdes.String(), Serdes.Long(), TOPIC_OUT);
 
         KafkaStreams streams = new KafkaStreams(builder, props);
         streams.start();
