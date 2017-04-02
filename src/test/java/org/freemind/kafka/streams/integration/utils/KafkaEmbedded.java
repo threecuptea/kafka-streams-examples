@@ -57,7 +57,7 @@ public class KafkaEmbedded {
      *               broker should listen to.  Note that you cannot change some settings such as
      *               `log.dirs`, `port`.
      */
-    public KafkaEmbedded(Properties config) throws IOException {
+    public KafkaEmbedded(Properties config, Time time) throws IOException {
         tmpFolder = new TemporaryFolder();
         tmpFolder.create();
         logDir = tmpFolder.newFolder();
@@ -67,7 +67,7 @@ public class KafkaEmbedded {
         KafkaConfig kafkaConfig = new KafkaConfig(effectiveConfig, loggingEnabled);
         log.debug("Starting embedded Kafka broker (with log.dirs={} and ZK ensemble at {}) ...",
                 logDir, zookeeperConnect());
-        kafka = KafkaServerBridge.createServer(kafkaConfig, Time.SYSTEM);
+        kafka = KafkaServerBridge.createServer(kafkaConfig, time);
         log.debug("Startup of embedded Kafka broker at {} completed (with ZK ensemble at {}) ...",
                 brokerList(), zookeeperConnect());
     }

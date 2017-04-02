@@ -55,21 +55,23 @@ public class WordCountLambdaDemo {
 
     private String bootstrapServer;
     private String storePath;
+    private boolean itgTest;
+
+    private KafkaStreams kafkaStreams;
 
     public WordCountLambdaDemo() {
-        this("localhost:9092", null);
+        this("localhost:9092", null, false);
     }
 
-    public WordCountLambdaDemo(String bootstrapServer, String storePath) {
+    public WordCountLambdaDemo(String bootstrapServer, String storePath, boolean itgTest) {
         this.bootstrapServer = bootstrapServer;
         this.storePath = storePath;
+        this.itgTest = itgTest;
     }
 
     public static void main(String[] args) throws Exception {
-
         WordCountLambdaDemo wordCount = new WordCountLambdaDemo();
         wordCount.execute();
-
     }
 
     public void execute() throws Exception {
@@ -85,6 +87,9 @@ public class WordCountLambdaDemo {
         if (storePath != null) {
             props.put(StreamsConfig.STATE_DIR_CONFIG, storePath);
         }
+        if (itgTest) {
+            props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
+        }
 
         KStreamBuilder builder = new KStreamBuilder();
         KStream<String, String> source = builder.stream(TOPIC_IN);
@@ -93,11 +98,19 @@ public class WordCountLambdaDemo {
                 .count("Counts");
         counts.to(Serdes.String(), Serdes.Long(), TOPIC_OUT);
 
-        KafkaStreams streams = new KafkaStreams(builder, props);
-        streams.start();
-        Thread.sleep(5000);
-
-        streams.close();
-
+        kafkaStreams = new KafkaStreams(builder, props);
+        kafkaStreams.start();
+        if (!itgTest) {
+            Thread.sleep(5000);
+            kafkaStreams.close();
+        }
     }
+
+    public void closeStream() {
+        //integration test will close streams
+        if (kafkaStreams != null) {
+            kafkaStreams.close();
+        }
+    }
+
 }

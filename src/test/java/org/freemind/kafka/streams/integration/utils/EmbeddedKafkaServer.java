@@ -9,6 +9,7 @@ package org.freemind.kafka.streams.integration.utils;
  */
 
 import kafka.server.KafkaConfig$;
+import org.apache.kafka.common.utils.Time;
 import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,8 @@ public class EmbeddedKafkaServer extends ExternalResource {
     private EmbeddedZookeeper zookeeper;
     private KafkaEmbedded broker;
     private final Properties brokerConfig;
+
+    public final Time time = Time.SYSTEM;
 
 
     /**
@@ -50,7 +53,7 @@ public class EmbeddedKafkaServer extends ExternalResource {
         Properties effectiveBrokerConfig = effectiveBrokerConfigFrom(brokerConfig, zookeeper);
         log.debug("Starting a Kafka instance on port {} ...",
                 effectiveBrokerConfig.getProperty(KafkaConfig$.MODULE$.PortProp()));
-        broker = new KafkaEmbedded(effectiveBrokerConfig);
+        broker = new KafkaEmbedded(effectiveBrokerConfig, time);
         log.debug("Kafka instance is running at {}, connected to ZooKeeper at {}",
                 broker.brokerList(), broker.zookeeperConnect());
     }
@@ -60,6 +63,7 @@ public class EmbeddedKafkaServer extends ExternalResource {
         effectiveConfig.putAll(brokerConfig);
         effectiveConfig.put(KafkaConfig$.MODULE$.ZkConnectProp(), zookeeper.connectString());
         effectiveConfig.put(KafkaConfig$.MODULE$.PortProp(), DEFAULT_BROKER_PORT);
+        effectiveConfig.put(KafkaConfig$.MODULE$.AutoCreateTopicsEnableProp(), true);
         effectiveConfig.put(KafkaConfig$.MODULE$.DeleteTopicEnableProp(), true);
         effectiveConfig.put(KafkaConfig$.MODULE$.LogCleanerDedupeBufferSizeProp(), 2 * 1024 * 1024L);
         effectiveConfig.put(KafkaConfig$.MODULE$.GroupMinSessionTimeoutMsProp(), 0);
