@@ -80,16 +80,13 @@ public class WordCountLambdaDemo {
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
         props.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-
-        // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString()); //To ensure each test run independently
+        props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 2000);//enough time to de-duplicate
         if (storePath != null) {
             props.put(StreamsConfig.STATE_DIR_CONFIG, storePath);
         }
-        if (itgTest) {
-            props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
-        }
+        // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        //props.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString()); //To ensure each test run independently
 
         KStreamBuilder builder = new KStreamBuilder();
         KStream<String, String> source = builder.stream(TOPIC_IN);
@@ -101,7 +98,7 @@ public class WordCountLambdaDemo {
         kafkaStreams = new KafkaStreams(builder, props);
         kafkaStreams.start();
         if (!itgTest) {
-            Thread.sleep(5000);
+            Thread.sleep(3000);
             kafkaStreams.close();
         }
     }
