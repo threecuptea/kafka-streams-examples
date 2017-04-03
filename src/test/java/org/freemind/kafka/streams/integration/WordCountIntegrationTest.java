@@ -25,9 +25,9 @@ import static org.junit.Assert.assertThat;
 //import static org.hamcrest.CoreMatchers.equalTo;
 //import static org.junit.Assert.assertThat;
 
-
 /**
- * Created by fandev on 3/23/17.
+ * See README.md for the explanation
+ * @author sling/threecuptea on 4/2/17.
  */
 public class WordCountIntegrationTest {
 

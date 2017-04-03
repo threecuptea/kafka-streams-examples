@@ -23,7 +23,6 @@ import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +43,7 @@ import static org.junit.Assert.assertThat;
  *  and specifies the frequency with which a processor flushes its state) or cache pressure hits.
  *  These are global parameters in the sense that they apply to all processor nodes in the topology,
  *
- * Created by fandev on 4/2/17.
+ * @author sling/threecuptea on 4/2/17.
  */
 @RunWith(Parameterized.class)
 public class WordCountIncludedTest {

@@ -1,7 +1,7 @@
 ### kafka-streams-example collects small projects that I worked on using Kafka streams.  This is the first time I wrote java 8 lambda and built with gradle.  Those projects were inspired by kafka-src streams-examples.  I plan to include scala examples too.
 #### The topics include:
    1. WordCountLambdaDemo (working example)
-      The instruction to run integration tests is in javadoc of that class
+      The instruction to run integration tests by starting real Kafka server etc. is in javadoc of that class
        
       To run WordCountDemo in streams-examples of Kafka-src 
       
@@ -11,10 +11,8 @@
         - ./gradlew streams:examples:tasks (if you want to find out what gradle task to use)
         - ./gradlew clean -PscalaVersion=2.12 streams:examples:jar
         - ./run-streams-examples.sh org.apache.kafka.streams.examples.wordcount.WordCountDemo
-      
-   2. PageViewRegionLambda (Working progress)
-      
-   3. EmbeddedKafkaServer   
+            
+   2. EmbeddedKafkaServer   
       I added this class to try to make WordCountLambdaDemo integration test work.  I ported this referencing multiple 
       sources and encounter multiple issues
       
@@ -44,3 +42,62 @@
               public static final EmbeddedKafkaServer SERVER = new EmbeddedKafkaServer();_
           to enforec the rule. ExternalResource plus TemporaryFolder are handy tools for _junit Rule_    
           
+   3.  WordCountIntegrationTest/WordCountIncludedTest
+   
+       I wrote WordCountIntegrationTest to start EmbeddedKafkaServer, create wordcount in/out topic, pass bootstrap
+       server(host:port) of the EmbeddedKafkaServer to WordCountLambdaDemo to start KafkaStream.  Then I use
+       TestUtils to publish message to wordcount in topic and TestUtils to consume ConsumerRecords 
+       (I ports from kafka-src IntegrationTestUtils and TestUtils) within timeout.  
+       I couldn't get it to work.
+        
+       I wrote WordCountIncludedTest to trouble shoot.  It's easier to manipulate StreamConfig parameters in
+       this way.  I manipulated cache.max.bytes.buffering and set it to 0.  I got expected output.   
+       However, I won't get correct result for the default cache.max.bytes.buffering (= 10 * 1024 * 1024) until I saw 
+       https://cwiki.apache.org/confluence/display/KAFKA/KIP-63%3A+Unify+store+and+downstream+caching+in+streams 
+       and manipulate another StreamConfig parameter commit.interval.ms. 
+       
+       cache.max.bytes.buffering is a new added parameter to serves as an unified mechanism for all processing nodes.
+       (Please read the above link). The semantics of this parameter is that data is forwarded and flushed whenever 
+       the earliest of commit.interval.ms which specifies the frequency with which a processor flushes its state or 
+       cache.max.bytes.buffering hits its limit. These are global parameters in the sense that they apply to all 
+       processor nodes in the topology,
+       
+       Let's say the word-count input lines are
+       "all streams lead to kafka"
+       "hello kafka streams"
+       "join kafka summit"
+       
+       KafkaStreams would output word count line as soon as it receive a input line and calculate counts 
+       when cache.max.bytes.buffering = 0 so that the expected output would be
+       all	    1
+       streams	1
+       lead	    1
+       to	    1
+       kafka    1
+       hello	1
+       kafka    2
+       streams	2
+       join     1
+       kafka	3
+       summit	1
+       
+       when cache.max.bytes.buffering is high, it would de-duplicate output lines by key and only send the lastest 
+       ones.  Therefore,  we are supposed to see
+       all	    1
+       lead	    1
+       to	    1
+       hello	1
+       streams	2
+       join     1
+       kafka	3
+       summit	1
+       
+       However, that data is only forwarded and flushed whenever the earliest of commit.interval.ms and 
+       cache.max.bytes.buffering hits its limit (10MB here).  The default value of commit.interval.ms is 30000 and
+       we set timeout to 10 sec when calling TestUtils.waitUntilMinKeyValueRecordsReceived. That's why we received 
+       0 records all the time before we shorten commit.interval.ms to less than 10 second. It works like a charm now.  
+       WordCountIncludedTest use org.junit.runners.Parameterized and WordCountIntegrationTest test against 
+       WordCountDemo. They both are very cool Kafka streams integration tests.       
+       
+       
+.          
