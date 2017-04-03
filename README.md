@@ -69,28 +69,28 @@
        
        KafkaStreams would output word count line as soon as it receive a input line and calculate counts 
        when cache.max.bytes.buffering = 0 so that the expected output would be
-       all	    1
-       streams	1
-       lead	    1
-       to	    1
-       kafka    1
-       hello	1
-       kafka    2
-       streams	2
-       join     1
-       kafka	3
-       summit	1
+       - all 1
+       - streams 1
+       - lead 1
+       - to	1
+       - kafka 1
+       - hello 1
+       - kafka 2
+       - streams 2
+       - join 1
+       - kafka 3
+       - summit	1
        
        when cache.max.bytes.buffering is high, it would de-duplicate output lines by key and only send the lastest 
        ones.  Therefore,  we are supposed to see
-       all	    1
-       lead	    1
-       to	    1
-       hello	1
-       streams	2
-       join     1
-       kafka	3
-       summit	1
+       - all 1
+       - lead 1
+       - to	1
+       - hello 1
+       - streams 2
+       - join 1
+       - kafka	3
+       - summit	1
        
        However, that data is only forwarded and flushed whenever the earliest of commit.interval.ms and 
        cache.max.bytes.buffering hits its limit (10MB here).  The default value of commit.interval.ms is 30000 and
