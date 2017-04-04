@@ -46,5 +46,54 @@ public class TestDataRepository {
         return expectedOutput;
     }
 
+    public static List<KeyValue<String, Long>> getTestUserClicks() {
+        final List<KeyValue<String, Long>> ret = Arrays.asList(
+                new KeyValue<>("alice", 13L),
+                new KeyValue<>("bob", 4L),
+                new KeyValue<>("chao", 25L),
+                new KeyValue<>("bob", 19L),
+                new KeyValue<>("dave", 56L),
+                new KeyValue<>("eve", 78L),
+                new KeyValue<>("alice", 40L),
+                new KeyValue<>("fang", 99L));
+        return ret;
+    }
+
+    public static List<KeyValue<String, String>> getTestUserRegions() {
+        final List<KeyValue<String, String>> ret =  Arrays.asList(
+                new KeyValue<>("alice", "asia"),   /* Alice lived in Asia originally... */
+                new KeyValue<>("bob", "americas"),
+                new KeyValue<>("chao", "asia"),
+                new KeyValue<>("dave", "europe"),
+                new KeyValue<>("alice", "europe"), /* ...but moved to Europe some time later. */
+                new KeyValue<>("eve", "americas"),
+                new KeyValue<>("fang", "asia"));
+        return ret;
+    }
+
+    public static List<KeyValue<String, Long>> getExpectedRegionClicks(final long cacheSizeBytes) {
+        final List<KeyValue<String, Long>> expectedOutput = cacheSizeBytes == 0 ?
+                Arrays.asList(
+                        new KeyValue<>("europe", 13L),
+                        new KeyValue<>("americas", 4L),
+                        new KeyValue<>("asia", 25L),
+                        new KeyValue<>("americas", 23L),
+                        new KeyValue<>("europe", 69L),
+                        new KeyValue<>("americas", 101L),
+                        new KeyValue<>("europe", 109L),
+                        new KeyValue<>("asia", 124L)
+                ) :
+                Arrays.asList(
+                        new KeyValue<>("americas", 101L),
+                        new KeyValue<>("europe", 109L),
+                        new KeyValue<>("asia", 124L)
+                );
+        return expectedOutput;
+    }
+
+
+
+
+
 
 }

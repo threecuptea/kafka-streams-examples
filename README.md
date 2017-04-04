@@ -100,5 +100,13 @@
        WordCountIncludedTest use org.junit.runners.Parameterized and WordCountIntegrationTest test against 
        WordCountDemo. They both are very cool Kafka streams integration tests.       
        
+   4.  SimpleJoinIncludedTes
+   
+       A simple integration test using user-click joined with user-region then re-key into region, group, reduce
+       It is inspired by kafka-src KStreamKTableJoinIntegrationTest.
        
+       The take aways lesson - publish user-region (lookup table) before publish user-click otherwise 
+       region would be "UNKNOWN" all the way
+     
+      
 .          
