@@ -95,7 +95,8 @@
        However, that data is only forwarded and flushed whenever the earliest of commit.interval.ms and 
        cache.max.bytes.buffering hits its limit (10MB here).  The default value of commit.interval.ms is 30000 and
        we set timeout to 10 sec when calling TestUtils.waitUntilMinKeyValueRecordsReceived. That's why we received 
-       0 records all the time before we shorten commit.interval.ms to less than 10 second. It works like a charm now.  
+       0 records all the time before we shorten commit.interval.ms to less than 10 second. It works like a charm now.
+         
        WordCountIncludedTest use org.junit.runners.Parameterized and WordCountIntegrationTest test against 
        WordCountDemo. They both are very cool Kafka streams integration tests.       
        
