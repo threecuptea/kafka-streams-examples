@@ -140,7 +140,7 @@ public class SimpleJoinIncludedTest {
                 .groupByKey(stringSerde, longSerde)
                 .reduce((v1, v2) -> v1 + v2, "ClicksPerRegionUnwindowed");
 
-        clickPerRegion.to(Serdes.String(), Serdes.Long(), topicOut);
+        clickPerRegion.to(stringSerde, longSerde, topicOut);
 
         kafkaStreams = new KafkaStreams(builder, streamsConfiguration);
         kafkaStreams.start();
