@@ -163,10 +163,10 @@ public class SimpleJoinIncludedTest {
         final Properties consumerProp = TestUtils.consumerConfig(SERVER.bootstrapServers(),
                 StringDeserializer.class, LongDeserializer.class);
         log.debug("cacheSizeBytes= {}", cacheSizeBytes);
-        int expectedOutputSize = getExpectedRegionClicks(cacheSizeBytes).size();
+        List<KeyValue<String, Long>> expectedOutput = getExpectedRegionClicks(cacheSizeBytes);
         List<KeyValue<String, Long>> actualOutput = TestUtils.waitUntilMinKeyValueRecordsReceived(consumerProp,
-                topicOut, expectedOutputSize, 10*1000);
-        assertThat(actualOutput.size(), equalTo(expectedOutputSize));
+                topicOut, expectedOutput.size(), 10*1000);
+        assertThat(actualOutput, equalTo(expectedOutput));
         System.out.println("==================");
         if (actualOutput.size() > 0) {
             for (KeyValue<String, Long> line: actualOutput) {

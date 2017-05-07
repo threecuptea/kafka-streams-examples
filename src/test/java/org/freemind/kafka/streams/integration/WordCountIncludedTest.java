@@ -24,10 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Properties;
+import java.util.*;
+
 import static org.freemind.kafka.streams.integration.TestDataRepository.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -73,7 +71,7 @@ public class WordCountIncludedTest {
         streamsConfiguration = new Properties();
         streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, WORD_COUNT_APP_PREFIX+testId);
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, SERVER.bootstrapServers());
-        streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName()); //Cannot comment out.  The default is ByteArraySerde
         streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, TestUtils.tempDirectory().getPath());
@@ -108,6 +106,8 @@ public class WordCountIncludedTest {
         KStream<String, String> source = builder.stream(wordCountTopicIn);
         KTable<String, Long> counts = source
                 .flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
+                //.map((key, value) -> new KeyValue<>(value, value))
+                //.groupByKey()
                 .groupBy((key, value) -> value)
                 .count("Counts");
 
@@ -131,10 +131,11 @@ public class WordCountIncludedTest {
         final Properties consumerProp = TestUtils.consumerConfig(SERVER.bootstrapServers(),
                 StringDeserializer.class, LongDeserializer.class);
         log.debug("cacheSizeBytes= {}", cacheSizeBytes);
-        int expectedOutputSize = getExpectedTestWordCountOutput(cacheSizeBytes).size();
+        List<KeyValue<String, Long>> expectedOutput = getExpectedTestWordCountOutput(cacheSizeBytes);
         List<KeyValue<String, Long>> actualOutput = TestUtils.waitUntilMinKeyValueRecordsReceived(consumerProp,
-                wordCountTopicOut, expectedOutputSize, 10 * 1000);
-        assertThat(actualOutput.size(), equalTo(expectedOutputSize));
+                wordCountTopicOut, expectedOutput.size(), 10 * 1000);
+        assertThat(actualOutput.size(), equalTo(expectedOutput.size()));
+        //assertThat(actualOutput, equalTo(expectedOutput)); //Why it works in SimpleJoinIncludedTest but not here
         System.out.println("==================");
         if (actualOutput.size() > 0) {
             for (KeyValue<String, Long> line: actualOutput) {

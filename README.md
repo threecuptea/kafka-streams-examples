@@ -18,22 +18,23 @@
       
       *  Java class cannot call directly scala class having a constructor with default parameters.  KafkaServer 
          has the following constructor
-           _class KafkaServer(val config: KafkaConfig, time: Time = Time.SYSTEM, threadNamePrefix: Option[String] = None, 
-             kafkaMetricsReporters: Seq[KafkaMetricsReporter] = List())_
-         I cannot call new KafkaServer(kafkaConfig, time) or new KafkaServer(kafkaConfig) from java code.  
+           _class KafkaServer(val config: KafkaConfig, time: Time = Time.SYSTEM, threadNamePrefix: 
+             Option[String] = None, kafkaMetricsReporters: Seq[KafkaMetricsReporter] = List())_
+         I cannot call new KafkaServer(kafkaConfig, time) or new KafkaServer(kafkaConfig) from java code.
+         I have to pass in Option and Seq parameters which are not java classes as well.  
          http://lampwww.epfl.ch/~michelou/scala/using-scala-from-java.html is an excellenet article regarding to 
          how to call scala code from java code (ex. KafkaConfig$.MODULE$.BrokerIdProp()).  
          
-         It turns out the best way to get around is to add an intermediate scala class to bridge them.  I added TestUtils
-         scala class with createServer method     
+         It turns out the best way to get around is to add an intermediate scala class to bridge them.  I added
+         KafkaServerBridge scala class with createServer method     
            _def createServer(config: KafkaConfig, time: Time = Time.SYSTEM): KafkaServer = {
              val server = new KafkaServer(config, time)
              server.startup()
              server
             }_
-            
-       * Both KafkaEmbedded and EmbeddedKafkaServer depend upon TestUtils scala class.  TestUtils scala class has
-         to be compiled before java classes. See SourceSet section in build.gradle to see how it works.
+         I still has to pass in Time but it is org.apache.kafka.common.utils.Time java class   
+       * Both KafkaEmbedded and EmbeddedKafkaServer depend upon KafkaServerBridge scala class.  KafkaServerBridge 
+         scala class has to be compiled before java classes. See SourceSet section in build.gradle to see how it works.
              
        *  EmbeddedKafkaServer extends from _org.junit.rules.ExternalResource_.  We can override its _before_ and _after_ 
           method to ensure that set up an external resource before a test and guarantee to tear it down afterward   
@@ -46,7 +47,7 @@
    
        I wrote WordCountIntegrationTest to start EmbeddedKafkaServer, create wordcount in/out topic, pass bootstrap
        server(host:port) of the EmbeddedKafkaServer to WordCountLambdaDemo to start KafkaStream.  Then I use
-       TestUtils to publish message to wordcount in topic and TestUtils to consume ConsumerRecords 
+       TestUtils to publish message to wordcount in topic and to consume ConsumerRecords 
        (I ports from kafka-src IntegrationTestUtils and TestUtils) within timeout.  
        I couldn't get it to work.
         
@@ -95,12 +96,13 @@
        However, that data is only forwarded and flushed whenever the earliest of commit.interval.ms and 
        cache.max.bytes.buffering hits its limit (10MB here).  The default value of commit.interval.ms is 30000 and
        we set timeout to 10 sec when calling TestUtils.waitUntilMinKeyValueRecordsReceived. That's why we received 
-       0 records all the time before we shorten commit.interval.ms to less than 10 second. It works like a charm now.
+       0 records all the time before we shorten commit.interval.ms to less than 10 second. It works like a charm 
+       once we set commit.interval.ms < 10 sec.
          
        WordCountIncludedTest use org.junit.runners.Parameterized and WordCountIntegrationTest test against 
        WordCountDemo. They both are very cool Kafka streams integration tests.       
        
-   4.  SimpleJoinIncludedTes
+   4.  SimpleJoinIncludedTest
    
        A simple integration test using user-click joined with user-region then re-key into region, group, reduce
        It is inspired by kafka-src KStreamKTableJoinIntegrationTest.

@@ -31,8 +31,7 @@ public class TestDataRepository {
                         new KeyValue<>("join", 1L),
                         new KeyValue<>("kafka", 3L),
                         new KeyValue<>("submit", 1L)
-                )
-                :
+                ) :
                 Arrays.asList(
                         new KeyValue<>("all", 1L),
                         new KeyValue<>("lead", 1L),

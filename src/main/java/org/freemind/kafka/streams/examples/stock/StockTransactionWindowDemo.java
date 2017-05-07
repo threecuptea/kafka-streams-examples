@@ -9,7 +9,6 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.kstream.internals.TimeWindow;
 import org.apache.kafka.streams.kstream.internals.WindowedDeserializer;
 import org.apache.kafka.streams.kstream.internals.WindowedSerializer;
 import org.apache.kafka.streams.processor.WallclockTimestampExtractor;
@@ -17,8 +16,6 @@ import org.freemind.kafka.streams.examples.model.StockTransaction;
 import org.freemind.kafka.streams.examples.model.StockTransactionCollector;
 import org.freemind.kafka.streams.examples.serializer.JsonDeserializer;
 import org.freemind.kafka.streams.examples.serializer.JsonSerializer;
-import scala.math.Ordering;
-
 import java.util.Properties;
 
 /**
