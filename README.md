@@ -109,6 +109,23 @@
        
        The take aways lesson - publish user-region (lookup table) before publish user-click otherwise 
        region would be "UNKNOWN" all the way
-     
-      
-.          
+       
+       I can assert actualOutput with expectedOutput successfully here. 
+       
+   5. WordCountIncludedTest enhancement and deep understanding       
+       * Stream configuration key.serde and value.serde are default to ByteArraySerde if not specified. 
+         Exclicitly specify if working with text to avoid error       
+       * There is an implicit form groupByKey
+           _groupByKey()__       
+         Kafka would substitute it with the exclicit form
+           _groupByKey(final Serde<K> keySerde, final Serde<V> valSerde);_         
+         using what you specify in key.serde and value.serde Streams configuration.  Throw exception if it mismatch.  
+         Therefore, use the exclicit form if key or value serde are different from 
+         the key.serde and value.serde Streams configuration.         
+       * Yes, there are two ways to generate word count after flatMap lines into individual words.  
+           _.groupBy((key, value) -> value)
+            .count("Counts");_
+            
+           _.map((key, value) -> new KeyValue<>(value, 1L))
+            .groupByKey(Serdes.String(), Serdes.Long()) 
+            .reduce((v1, v2) -> v1 + v2, "Counts");_           
