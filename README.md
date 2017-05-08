@@ -114,14 +114,14 @@
        
    5. WordCountIncludedTest enhancement and deep understanding       
        * Stream configuration key.serde and value.serde are default to ByteArraySerde if not specified. 
-         Exclicitly specify if working with text to avoid error       
+         You should explicitly specify them if working with text to avoid error       
        * There is an implicit form of groupByKey
-           _groupByKey()__       
-         Kafka would substitute it with the exclicit form
+           _groupByKey()_      
+         Kafka would substitute it with the explicit form
            _groupByKey(final Serde<K> keySerde, final Serde<V> valSerde);_         
-         using what you specify in key.serde and value.serde Streams configuration.  Throw exception if it mismatch.  
-         Therefore, use the exclicit form if key or value serde are different from 
-         the one specified in Streams configuration.         
+         using what you specify in key.serde and value.serde Streams configuration.  Throw exception if either one 
+         mismatches.  Therefore, use the explicit form if key or value serde are different from the one specified 
+         in Streams configuration.         
        * Yes, there are two ways to generate word count after flatMap lines into individual words.  
            _.groupBy((key, value) -> value)
             .count("Counts");_
