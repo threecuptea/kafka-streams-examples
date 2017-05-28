@@ -159,6 +159,7 @@ public class WordCountIncludedTest {
                 .flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
                 .map((key, value) -> new KeyValue<>(value, 1L))
                 .groupByKey(Serdes.String(), Serdes.Long()) //Has to specify exclicitly otherwise it will try to cast Long to String to match StreamConfig
+                //(aggValue, newValue)
                 .reduce((v1, v2) -> v1 + v2, "Counts");
 
         counts.to(Serdes.String(), Serdes.Long(), wordCountTopicOut);

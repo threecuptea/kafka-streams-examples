@@ -131,7 +131,22 @@ public class SimpleJoinIncludedTest {
         KStreamBuilder builder = new KStreamBuilder();
         KStream<String, Long> userClick = builder.stream(stringSerde, longSerde, topicUserClick);
         KTable<String, String> userRegionTable = builder.table(stringSerde, stringSerde, topicUserRegion, storeUserRegion);
-
+        //Join need to make sure data co-partitioned
+        //The join is key-based, i.e. with the join predicate leftRecord.key == rightRecord.key,
+        //KStream, KStream join is always Window-based. Two input records are joined if and only if their timestamps
+        // are “close” to each other as defined by the user-supplied JoinWindows. Even though this operation is windowed,
+        // the joined stream will be of type KStream<K, ...> rather than KStream<Windowed<K>, ...>
+        //Suggestions: rewrite https://github.com/confluentinc/examples/blob/3.2.x/kafka-streams/src/test/java/io/confluent/examples/streams/StreamToStreamJoinIntegrationTest.java
+        //KTable-KTable joins are always non-windowed joins. They are designed to be consistent with their counterparts
+        // in relational databases. The changelog streams of both KTables are materialized into local state
+        // stores to represent the latest snapshot of their table duals.
+        // The join result is a new KTable that represents the changelog stream of the join operation.
+        //KStream and KTable Join, Only input records for the left side (stream) trigger the join.
+        // Input records for the right side (table) update only the internal right-side join state.
+        //GlobalTable does not require data co-partitioning.  They allow for joining against foreign keys; i.e.,
+        //you can lookup data in the table not just by the keys of records in the stream, but also by data in the record values.
+        //using KeyValueMapper. KeyValueMapper#apply(leftRecord.key, leftRecord.value) == rightRecord.key.
+        //See GlobalKTableIntegrationTest in Kafka src
         KTable<String, Long> clickPerRegion = userClick
                 .leftJoin(userRegionTable, (clicks, region) -> new RegionClicks(region == null ? "UNKNOWN" : region, clicks))
                 .map((user, regionClick) -> new KeyValue<>(regionClick.region, regionClick.clicks))

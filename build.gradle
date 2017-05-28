@@ -28,10 +28,19 @@ sourceSets {
     }
 }
 
+task runWordCount(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.freemind.kafka.streams.examples.wordcount.WordCountLambdaDemo'
+}
+
+task runStockTransaction(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.freemind.kafka.streams.examples.stock.StockTransactionWindowDemo'
+}
+
 
 task fatJar(type: Jar) {
     baseName = project.name + '-all'
-    dependsOn compileJava
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }

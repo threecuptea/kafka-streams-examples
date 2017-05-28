@@ -97,7 +97,8 @@
        cache.max.bytes.buffering hits its limit (10MB here).  The default value of commit.interval.ms is 30000 and
        we set timeout to 10 sec when calling TestUtils.waitUntilMinKeyValueRecordsReceived. That's why we received 
        0 records all the time before we shorten commit.interval.ms to less than 10 second. It works like a charm 
-       once we set commit.interval.ms < 10 sec.
+       once we set commit.interval.ms < 10 sec.  Refer to 
+       http://docs.confluent.io/current/streams/developer-guide.html#streams-developer-guide for more details 
          
        WordCountIncludedTest use org.junit.runners.Parameterized and WordCountIntegrationTest test against 
        WordCountDemo. They both are very cool Kafka streams integration tests.       
@@ -121,11 +122,42 @@
            _groupByKey(final Serde<K> keySerde, final Serde<V> valSerde);_         
          using what you specify in key.serde and value.serde Streams configuration.  Throw exception if either one 
          mismatches.  Therefore, use the explicit form if key or value serde are different from the one specified 
-         in Streams configuration.         
+         in Streams configuration.  For example, in testWordCountIncluded2(), I have to use 
+         groupByKey(Serdes.String(), Serdes.Long()) since the default value serde is defined as Serdes.String().       
        * Yes, there are two ways to generate word count after flatMap lines into individual words.  
            _.groupBy((key, value) -> value)
             .count("Counts");_
             
            _.map((key, value) -> new KeyValue<>(value, 1L))
             .groupByKey(Serdes.String(), Serdes.Long()) 
-            .reduce((v1, v2) -> v1 + v2, "Counts");_           
+            .reduce((v1, v2) -> v1 + v2, "Counts");_    
+            
+   6.  StockTransactionWindowDemo is inspired by https://github.com/bbejeck/kafka-streams.  I rewrote it to output 
+       StockWindow instead of Windowd<String> directly because kafka-console-consumer.sh cannot display Windowed 
+       timestamp
+       * It suffers the same issue as https://stackoverflow.com/questions/44049877.  Kafka Stream commit makes 
+         particular window to get pushed multiple times to a topic as commit is triggered during that window.
+         The problem is that Kafka memory internals: commit.interval.ms and cache.max.bytes.buffering continue to play 
+         a role when Kafka-stream output its results.  TimeWindow boundary is based upon epoch time(ex. 
+         May 28, 2017 1:15:20 PM, May 28, 2017 1:15:30 PM for 10 sec.)  commit.interval.ms might be based upon 
+         application start-up time.  They cannot be in sync with small TimeWindow and not to say big TimeWindow like
+         1 day or 1 week.  What value of cache.max.bytes.buffering should we set for in this case?
+               
+       * In my opinion, Kafka-streams should honor TimeWindow expectation regardless internal memory management.  Kept
+         commit results in the state store and not to output.  When TimeWindow hit timeout limit, it should add 
+         uncommited summary to the last committed one then output.          
+
+       * I like POLO JSON Serdes using gson implementation (JsonSerialize & JsonDeserialize in 
+         org.freemind.kafka.streams.examples.serializer package. 
+           _JsonSerializer<StockTransaction> trxSerializer = new JsonSerializer<>();
+            JsonDeserializer<StockTransaction> trxDeserializer = new JsonDeserializer<>(StockTransaction.class);
+            Serde<StockTransaction> trxSerde = Serdes.serdeFrom(trxSerializer, trxDeserializer);_ 
+            
+         The above is an example of Serde<StockTransaction>.  It only takes 3 lines of codes.  This is much better than 
+         PageViewTypedDemo in kafka-src. That is using fastxml jackson implementation and it takes 7 lines for each 
+         POLO JSON Serdes.  That's why I am using untype one in PageViewRegionLambda. However, Untype JSON Serdes 
+         implemented using JsonNode and JsonNodeFactory are just not as natural as POLO JSON Serdes                
+         
+   I will study Spark structured streaming solution (Spark calls it SlidingWindow) first.  Then come back to finish
+   KStreamKStream, KTableKTable, KStreamGlobalTable, KStreamAggregation include/integration tests. 
+   http://docs.confluent.io/current/streams/developer-guide.html is excellent docuement.
