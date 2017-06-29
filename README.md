@@ -147,8 +147,9 @@
          commit results in the state store and not to output.  When TimeWindow hit timeout limit, it should add 
          uncommited summary to the last committed one then output.          
 
-       * I like POLO JSON Serdes using gson implementation (JsonSerialize & JsonDeserialize in 
-         org.freemind.kafka.streams.examples.serializer package. 
+       * I like POLO JSON Serdes using gson implementation (JsonSerializer & JsonDeserializer in 
+         org.freemind.kafka.streams.examples.serializer package.
+                   
            _JsonSerializer<StockTransaction> trxSerializer = new JsonSerializer<>();
             JsonDeserializer<StockTransaction> trxDeserializer = new JsonDeserializer<>(StockTransaction.class);
             Serde<StockTransaction> trxSerde = Serdes.serdeFrom(trxSerializer, trxDeserializer);_ 
