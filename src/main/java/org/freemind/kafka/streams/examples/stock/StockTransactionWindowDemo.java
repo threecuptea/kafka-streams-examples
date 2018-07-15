@@ -21,7 +21,7 @@ import java.util.Properties;
  * Last update on 5/7/2017
  * This suffers the same problem as
  * https://stackoverflow.com/questions/44049877/kafka-stream-commit-makes-particular-window-to-get-pushed-multiple-times-to-a-to
- * There is a answer yet
+ * There isn't a answer yet
 
  * inspired by https://github.com/bbejeck/kafka-streams StockTransactionWindowDemo
  */
@@ -68,7 +68,7 @@ public class StockTransactionWindowDemo {
                 .aggregate(StockTransactionCollector::new,
                         //(aggKey, newValue, aggValue)
                         (k, v, collector) -> collector.add(v),
-                        TimeWindows.of(20000),
+                        TimeWindows.of(30000),
                         collectorSerde, STORE_SUMMARY)
                 .toStream()
                 .map((key, value) -> new KeyValue<>(new StockWindow(key.key(), new Date(key.window().start())), value))
@@ -87,7 +87,7 @@ public class StockTransactionWindowDemo {
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         //props.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         //props.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 20000);
+        props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 30000);
         //props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, Long.MAX_VALUE);
         // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
         //props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
